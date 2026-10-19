@@ -1,0 +1,25 @@
+{
+  "name": "cinebookie",
+  "version": "1.0.0",
+  "description": "CineBookie - Online Movie Ticket Booking System (OMTBS)",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "start:backend": "npm run start --workspace=backend",
+    "start:frontend": "npm run preview --workspace=frontend",
+    "dev": "concurrently -n \"BACKEND,FRONTEND\" -c \"cyan,magenta\" \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "start": "concurrently -n \"BACKEND,FRONTEND\" -c \"cyan,magenta\" \"npm run start:backend\" \"npm run dev:frontend\"",
+    "build": "npm run build --workspace=frontend",
+    "db:init": "npm run db:init --workspace=backend",
+    "db:seed": "npm run db:seed --workspace=backend",
+    "test": "node backend/test/api.test.js"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

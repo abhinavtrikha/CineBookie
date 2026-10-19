@@ -1,0 +1,360 @@
+Software Requirements Specification
+
+Project: Online Movie Ticket Booking System (OMTBS)
+Version: 1.0
+
+---
+
+1. Introduction
+
+1.1 Purpose
+
+The purpose of this Software Requirements Specification (SRS) is to define the requirements of the Online Movie Ticket Booking System (OMTBS). The system is intended to simplify movie ticket booking by allowing customers to browse movies, view show timings, select seats, and book tickets online.
+
+This document describes the functional and non-functional requirements of the system and provides a basis for its design, development, and testing.
+
+1.2 Document Conventions
+
+The term OMTBS refers to the Online Movie Ticket Booking System. Admin and Customer refer to the two main types of users. The word shall indicates a mandatory requirement. Functional requirements are identified as FR, while non-functional requirements are identified as NFR.
+
+1.3 Intended Audience and Reading Suggestions
+
+This document is intended for project developers, testers, project guides, administrators, and users.
+
+The document covers the system overview, interfaces, features, non-functional requirements, business rules, and glossary.
+
+1.4 Product Scope
+
+The system will allow customers to register, browse movies, view movie details and show timings, select theatres and seats, and book tickets online.
+
+Administrators will manage movies, theatres, screens, seats, shows, and booking records.
+
+The system aims to reduce manual ticket booking and provide a convenient online booking method. Advanced features such as loyalty programs, personalized recommendations, food ordering, and advanced analytics are outside the scope of the current system.
+
+1.5 References
+
+[1] IEEE Computer Society, IEEE Recommended Practice for Software Requirements Specifications, IEEE Std 830-1998, 1998.
+
+[2] I. Sommerville, Software Engineering, 10th ed. Boston, MA, USA: Pearson, 2016.
+
+---
+
+2. Overall Description
+
+2.1 Product Perspective
+
+The Online Movie Ticket Booking System is a web-based system designed to simplify movie ticket booking and reduce dependence on physical ticket counters.
+
+Administrators will manage movies, theatres, screens, shows, seats, and bookings, while customers will browse movies and book tickets.
+
+A centralized database will store information about users, movies, theatres, screens, shows, seats, and bookings.
+
+2.2 Product Functions
+
+The system will provide:
+
+- User registration and login
+- Movie browsing and searching
+- Movie details
+- Theatre and show selection
+- Seat availability and selection
+- Ticket booking
+- Payment processing
+- Booking confirmation
+- Booking history
+
+Administrators will manage movies, theatres, screens, seats, shows, and booking records.
+
+2.3 User Classes and Characteristics
+
+The system will have two main users: Administrator and Customer.
+
+The Administrator will manage movies, theatres, screens, seats, shows, and booking information.
+
+The Customer will browse movies, view shows, select seats, book tickets, and view booking details.
+
+Users are expected to have basic knowledge of computers, smartphones, and web browsers.
+
+2.4 Operating Environment
+
+The system will operate as a web application accessible through standard browsers on desktops, laptops, tablets, and smartphones.
+
+A network connection and database management system will be required.
+
+2.5 Design and Implementation Constraints
+
+The system shall provide a simple and user-friendly interface and use a structured database for storing system information.
+
+Access shall be controlled according to user roles.
+
+The system shall prevent an already booked seat from being booked again for the same show.
+
+Advanced features such as recommendation systems, loyalty programs, dynamic pricing, and food ordering are outside the current scope.
+
+2.6 User Documentation
+
+The system will provide basic instructions for registration, login, movie browsing, show selection, seat selection, booking, and viewing booking history.
+
+Administrator documentation will cover management of movies, theatres, screens, seats, shows, and bookings.
+
+2.7 Assumptions and Dependencies
+
+The system assumes that customers provide valid information during registration and booking and that administrators maintain accurate movie, theatre, screen, seat, and show information.
+
+The system depends on the availability of the application, database, and network connection.
+
+---
+
+3. External Interface Requirements
+
+3.1 User Interfaces
+
+The system shall provide simple interfaces for administrators and customers.
+
+The login interface shall allow users to enter credentials and access role-specific functions.
+
+Customers shall be able to browse and search movies, view details, select theatres and shows, select seats, confirm bookings, and view booking history.
+
+Administrators shall have interfaces for managing movies, theatres, screens, seats, shows, and bookings.
+
+The system shall display appropriate messages for successful operations and invalid inputs.
+
+3.2 Hardware Interfaces
+
+The system does not require specialized hardware.
+
+It shall operate on desktop computers, laptops, tablets, and smartphones with suitable input and display facilities.
+
+3.3 Software Interfaces
+
+The system shall interact with a database management system to store and retrieve information related to users, movies, theatres, screens, seats, shows, payments, and bookings.
+
+The web application shall operate through a standard browser and communicate with the database through the selected development technologies.
+
+3.4 Communications Interfaces
+
+The system shall require a network connection for web-based operation.
+
+Communication between the user interface, application, and database shall use appropriate network protocols. Secure communication shall be used for protecting sensitive information.
+
+---
+
+4. System Features
+
+4.1 User Registration and Login
+
+The system shall provide registration and login facilities for customers. Users shall receive access according to their roles after successful authentication.
+
+Functional Requirements
+
+FR-1: The system shall allow customers to create an account.
+
+FR-2: The system shall allow registered users to enter login credentials.
+
+FR-3: The system shall verify the provided credentials.
+
+FR-4: The system shall provide role-based access.
+
+4.2 Movie Management
+
+The administrator shall manage movie information such as title, genre, language, duration, release date, and description.
+
+Functional Requirements
+
+FR-5: The system shall allow the administrator to add movies.
+
+FR-6: The system shall allow the administrator to update movie details.
+
+FR-7: The system shall allow the administrator to delete movies.
+
+FR-8: The system shall allow customers to view available movies.
+
+FR-9: The system shall allow customers to search for movies.
+
+FR-10: The system shall allow customers to view movie details.
+
+4.3 Theatre and Screen Management
+
+The administrator shall maintain theatre, screen, and seat information.
+
+Functional Requirements
+
+FR-11: The system shall allow the administrator to add theatre information.
+
+FR-12: The system shall allow the administrator to update and delete theatre information.
+
+FR-13: The system shall allow the administrator to add and manage screens.
+
+FR-14: The system shall allow the administrator to maintain seats for each screen.
+
+4.4 Show Management
+
+The administrator shall create and manage shows containing the movie, theatre, screen, date, and time.
+
+Functional Requirements
+
+FR-15: The system shall allow the administrator to create shows.
+
+FR-16: The system shall allow the administrator to update show details.
+
+FR-17: The system shall allow the administrator to delete shows.
+
+FR-18: The system shall allow customers to view available show timings.
+
+FR-19: The system shall display shows based on the selected movie and theatre.
+
+4.5 Seat Selection
+
+The system shall display the seat layout and availability for a selected show.
+
+Functional Requirements
+
+FR-20: The system shall display the seat layout for a selected show.
+
+FR-21: The system shall display seat availability.
+
+FR-22: The system shall allow customers to select available seats.
+
+FR-23: The system shall prevent selection of already booked seats.
+
+FR-24: The system shall calculate the total ticket amount based on selected seats.
+
+4.6 Ticket Booking
+
+Customers shall be able to confirm a booking after selecting a movie, theatre, show, and seats.
+
+Functional Requirements
+
+FR-25: The system shall allow customers to review booking details before confirmation.
+
+FR-26: The system shall allow customers to confirm a ticket booking.
+
+FR-27: The system shall generate a unique booking ID.
+
+FR-28: The system shall store booking details in the database.
+
+FR-29: The system shall update the availability of booked seats.
+
+FR-30: The system shall display booking confirmation after successful booking.
+
+4.7 Payment Management
+
+The system shall provide a facility for completing payment for a ticket booking.
+
+Functional Requirements
+
+FR-31: The system shall display the total amount before payment.
+
+FR-32: The system shall allow customers to complete payment through the supported payment method.
+
+FR-33: The system shall record the payment status of a booking.
+
+FR-34: The system shall not confirm a booking if payment is unsuccessful.
+
+4.8 Booking History and Ticket Details
+
+Customers shall be able to view current and previous bookings.
+
+Functional Requirements
+
+FR-35: The system shall allow customers to view booking history.
+
+FR-36: The system shall allow customers to view booking details.
+
+FR-37: The system shall display the booking ID for confirmed bookings.
+
+FR-38: The system shall display the booking status.
+
+---
+
+5. Non-Functional Requirements
+
+5.1 Performance Requirements
+
+The system shall provide reasonable response times for normal operations and should complete valid operations within a few seconds under normal conditions.
+
+It shall handle the expected number of users, movies, shows, seats, and bookings without significant performance degradation.
+
+5.2 Safety Requirements
+
+The system does not directly control physical or safety-critical equipment. Therefore, no specific physical safety requirements apply.
+
+The system shall prevent accidental loss or modification of important booking information through appropriate user confirmation.
+
+5.3 Security Requirements
+
+The system shall require authentication before accessing protected functions.
+
+Access shall be controlled according to user roles. Administrators shall manage system records, while customers shall only access their own personal and booking information.
+
+Unauthorized users shall not be allowed to access or modify restricted information.
+
+User credentials and sensitive information shall be stored securely.
+
+5.4 Software Quality Attributes
+
+The system shall be simple and easy to use, with clear navigation and understandable messages.
+
+It shall reliably store and retrieve movie, show, seat, payment, and booking information.
+
+The system shall maintain consistency between seat availability and booking records.
+
+The system shall be maintainable so that basic features can be modified or extended without major changes to the entire system.
+
+5.5 Business Rules
+
+Only the administrator shall manage movie, theatre, screen, seat, and show records.
+
+A customer shall be registered before booking a ticket.
+
+A customer shall select a valid movie, theatre, show, and available seat before booking.
+
+A seat shall not be bookable if it has already been booked for the selected show.
+
+Each confirmed booking shall have a unique booking ID.
+
+The booking amount shall depend on the selected seats and applicable ticket price.
+
+A booking shall be confirmed only after successful payment.
+
+Customers shall only be allowed to view their own booking information.
+
+---
+
+6. Other Requirements
+
+The Online Movie Ticket Booking System does not have additional requirements beyond those specified above.
+
+The system shall maintain the consistency and integrity of information stored in the database.
+
+Information related to users, movies, theatres, screens, seats, shows, payments, and bookings shall be stored in an organized manner and accessed only by authorized users.
+
+Any additional requirements identified during development may be added to this section in future revisions.
+
+---
+
+Glossary
+
+Administrator: The person responsible for managing the Online Movie Ticket Booking System.
+
+Customer: A registered user who can browse movies and book tickets.
+
+Movie: A film available for viewing and ticket booking.
+
+Theatre: A physical cinema location where movies are shown.
+
+Screen: A viewing hall within a theatre where a movie is shown.
+
+Seat: A designated seating position within a screen.
+
+Show: A scheduled screening of a movie at a particular theatre, screen, date, and time.
+
+Booking: A record created when a customer reserves one or more seats for a show.
+
+Booking ID: A unique identifier assigned to a confirmed booking.
+
+Payment: The transaction associated with the ticket booking amount.
+
+Seat Availability: The status indicating whether a seat is available or booked for a particular show.
+
+Booking History: A record of a customer's previous and current bookings.

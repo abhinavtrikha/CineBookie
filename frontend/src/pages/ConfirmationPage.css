@@ -1,0 +1,66 @@
+.confirmation-page { padding: 40px 0 60px; display: flex; justify-content: center; }
+.confirmation-card { width: 100%; max-width: 600px; text-align: center; }
+.success-icon { font-size: 4rem; margin-bottom: 16px; }
+.error-icon { font-size: 4rem; margin-bottom: 16px; }
+.conf-title { font-size: 1.8rem; margin-bottom: 8px; }
+.conf-subtitle { margin-bottom: 32px; }
+
+.ticket {
+  background: var(--color-bg3);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  margin: 0 auto 32px;
+  text-align: left;
+  position: relative;
+}
+.ticket::before, .ticket::after {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  background: var(--color-bg);
+  border-radius: 50%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.ticket::before { left: -12px; }
+.ticket::after { right: -12px; }
+
+.ticket-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, rgba(232,67,147,0.2), rgba(245,166,35,0.1));
+  border-bottom: 1px dashed var(--color-border);
+}
+.ticket-brand { font-weight: 800; font-size: 1rem; }
+.ticket-main { padding: 20px 24px; }
+.ticket-movie { font-size: 1.5rem; margin-bottom: 20px; }
+.ticket-details { display: flex; flex-direction: column; gap: 12px; }
+.ticket-row { display: flex; justify-content: space-between; gap: 16px; }
+.ticket-label { font-size: 0.82rem; color: var(--color-text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; flex-shrink: 0; }
+.ticket-value { font-weight: 600; font-size: 0.9rem; text-align: right; }
+.ticket-ref { font-family: monospace; font-size: 1rem; color: var(--color-accent); }
+.seats-list { }
+
+.ticket-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-top: 1px dashed var(--color-border);
+  background: rgba(255,255,255,0.02);
+}
+.ticket-amount { display: flex; flex-direction: column; gap: 4px; }
+.ticket-price { font-size: 1.5rem; font-weight: 800; }
+.ticket-barcode { letter-spacing: 2px; font-size: 0.6rem; color: var(--color-border); }
+
+.conf-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+@media (max-width: 600px) {
+  .ticket::before, .ticket::after { display: none; }
+  .ticket-row { flex-direction: column; gap: 2px; }
+  .ticket-value { text-align: left; }
+}

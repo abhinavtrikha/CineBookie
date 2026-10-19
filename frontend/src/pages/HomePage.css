@@ -1,0 +1,74 @@
+.hero {
+  position: relative;
+  min-height: 480px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 60% 50%, rgba(232,67,147,0.15) 0%, transparent 70%),
+              radial-gradient(ellipse at 20% 80%, rgba(245,166,35,0.08) 0%, transparent 50%),
+              var(--color-bg);
+}
+.hero-content {
+  position: relative;
+  z-index: 1;
+  padding: 60px 20px;
+}
+.hero-text { max-width: 580px; }
+.hero-title { font-size: 3rem; line-height: 1.1; margin-bottom: 20px; }
+.hero-highlight {
+  background: linear-gradient(135deg, #e84393, #f5a623);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-subtitle { font-size: 1.15rem; color: var(--color-text-muted); margin-bottom: 32px; line-height: 1.6; }
+.hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+
+.features-section { padding: 64px 20px; }
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+.feature-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  text-align: center;
+  transition: all 0.2s;
+}
+.feature-card:hover { border-color: var(--color-primary); transform: translateY(-2px); }
+.feature-icon { font-size: 2.4rem; margin-bottom: 12px; }
+.feature-card h3 { margin-bottom: 8px; font-size: 1.05rem; }
+.feature-card p { color: var(--color-text-muted); font-size: 0.9rem; }
+
+.now-showing { padding-bottom: 64px; }
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+.section-header h2 { font-size: 1.6rem; }
+.see-all { color: var(--color-primary); font-size: 0.95rem; font-weight: 600; }
+.see-all:hover { color: var(--color-primary-light); }
+
+.footer {
+  background: var(--color-bg2);
+  border-top: 1px solid var(--color-border);
+  padding: 40px 0;
+  text-align: center;
+}
+.footer-brand { font-size: 1.4rem; font-weight: 800; margin-bottom: 8px; }
+.footer-note { color: var(--color-text-muted); font-size: 0.9rem; }
+
+@media (max-width: 768px) {
+  .hero-title { font-size: 2rem; }
+  .hero-subtitle { font-size: 1rem; }
+  .features-section { padding: 40px 16px; }
+}
