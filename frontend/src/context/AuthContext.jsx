@@ -8,12 +8,19 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('cinebookie_user');
-    const token = localStorage.getItem('cinebookie_token');
-    if (savedUser && token) {
-      setUser(JSON.parse(savedUser));
+    try {
+      const savedUser = localStorage.getItem('cinebookie_user');
+      const token = localStorage.getItem('cinebookie_token');
+      if (savedUser && token) {
+        setUser(JSON.parse(savedUser));
+      }
+    } catch (e) {
+      console.warn('Failed to parse cached user session:', e);
+      localStorage.removeItem('cinebookie_token');
+      localStorage.removeItem('cinebookie_user');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   const login = async (email, password) => {

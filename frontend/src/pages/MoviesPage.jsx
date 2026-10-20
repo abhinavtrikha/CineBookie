@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import api from '../api/axios';
+import Icon from '../components/Icon';
 import MovieCard from '../components/MovieCard';
 import './MoviesPage.css';
 
@@ -12,51 +13,114 @@ export default function MoviesPage() {
   const [search, setSearch] = useState('');
   const [genre, setGenre] = useState('All');
   const [language, setLanguage] = useState('All');
+  const [sortBy, setSortBy] = useState('default');
   const [error, setError] = useState('');
 
-  const fetchMovies = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const params = {};
-      if (search) params.search = search;
-      if (genre !== 'All') params.genre = genre;
-      if (language !== 'All') params.language = language;
-      const res = await api.get('/movies', { params });
-      setMovies(res.data.movies);
-    } catch (err) {
-      setError('Failed to load movies. Please try again.');
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      const fetchMovies = async () => {
+        setLoading(true);
+        setError('');
+        try {
+          const params = {};
+          if (search.trim()) params.search = search.trim();
+          if (genre !== 'All') params.genre = genre;
+          if (language !== 'All') params.language = language;
+          const res = await api.get('/movies', { params, signal: controller.signal });
+          setMovies(res.data.movies);
+        } catch {
+          if (!controller.signal.aborted) {
+            setError('Failed to load movies. Please try again.');
+          }
+        } finally {
+          if (!controller.signal.aborted) {
+            setLoading(false);
+          }
+        }
+      };
+
+      fetchMovies();
+    }, 250);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [search, genre, language]);
+
+  const handleResetFilters = () => {
+    setSearch('');
+    setGenre('All');
+    setLanguage('All');
+    setSortBy('default');
+  };
+
+  const hasActiveFilters = search.trim() !== '' || genre !== 'All' || language !== 'All';
+
+  // Client-side sorting for instantaneous response
+  const sortedMovies = useMemo(() => {
+    const list = [...movies];
+    if (sortBy === 'title-asc') {
+      return list.sort((a, b) => a.title.localeCompare(b.title));
     }
-  };
-
-  useEffect(() => { fetchMovies(); }, [genre, language]);
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    fetchMovies();
-  };
+    if (sortBy === 'title-desc') {
+      return list.sort((a, b) => b.title.localeCompare(a.title));
+    }
+    if (sortBy === 'duration-asc') {
+      return list.sort((a, b) => a.duration_mins - b.duration_mins);
+    }
+    if (sortBy === 'duration-desc') {
+      return list.sort((a, b) => b.duration_mins - a.duration_mins);
+    }
+    return list;
+  }, [movies, sortBy]);
 
   return (
     <div className="movies-page container">
       <div className="page-header">
-        <h1 className="page-title">Movies</h1>
-        <p className="page-subtitle">Browse and book tickets for now showing films</p>
+        <h1 className="page-title">Explore Movies</h1>
+        <p className="page-subtitle">Catch the latest blockbusters and critically acclaimed releases</p>
       </div>
 
       {/* Search & Filters */}
       <div className="movies-filters">
-        <form className="search-form" onSubmit={handleSearch}>
-          <input
-            type="text"
-            className="form-input search-input"
-            placeholder="Search movies by title or genre..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
-          <button type="submit" className="btn btn-primary">Search</button>
-        </form>
+        <div className="search-sort-bar">
+          <div className="search-input-wrap">
+            <Icon name="search" size={18} className="search-icon" />
+            <input
+              type="text"
+              className="form-input search-input"
+              placeholder="Search movies by title, genre, or keyword..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+            {search && (
+              <button
+                className="clear-search-btn"
+                onClick={() => setSearch('')}
+                title="Clear search"
+                type="button"
+              >
+                ×
+              </button>
+            )}
+          </div>
+
+          <div className="sort-wrap">
+            <label className="sort-label">Sort by:</label>
+            <select
+              className="form-input sort-select"
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value)}
+            >
+              <option value="default">Featured</option>
+              <option value="title-asc">Title (A to Z)</option>
+              <option value="title-desc">Title (Z to A)</option>
+              <option value="duration-asc">Duration (Shortest)</option>
+              <option value="duration-desc">Duration (Longest)</option>
+            </select>
+          </div>
+        </div>
 
         <div className="filter-row">
           <div className="filter-group">
@@ -67,12 +131,14 @@ export default function MoviesPage() {
                   key={g}
                   className={`chip ${genre === g ? 'active' : ''}`}
                   onClick={() => setGenre(g)}
+                  type="button"
                 >
                   {g}
                 </button>
               ))}
             </div>
           </div>
+
           <div className="filter-group">
             <label className="filter-label">Language</label>
             <div className="filter-chips">
@@ -81,6 +147,7 @@ export default function MoviesPage() {
                   key={l}
                   className={`chip ${language === l ? 'active' : ''}`}
                   onClick={() => setLanguage(l)}
+                  type="button"
                 >
                   {l}
                 </button>
@@ -88,26 +155,49 @@ export default function MoviesPage() {
             </div>
           </div>
         </div>
+
+        {hasActiveFilters && (
+          <div className="active-filters-bar">
+            <span className="text-muted" style={{ fontSize: '0.85rem' }}>Active Filters:</span>
+            {search && <span className="active-pill">Keyword: "{search}"</span>}
+            {genre !== 'All' && <span className="active-pill">Genre: {genre}</span>}
+            {language !== 'All' && <span className="active-pill">Language: {language}</span>}
+            <button className="reset-filters-btn" onClick={handleResetFilters} type="button">
+              Clear All Filters
+            </button>
+          </div>
+        )}
       </div>
 
-      {error && <div className="alert alert-error">{error}</div>}
+      {error && <div className="alert alert-error"><Icon name="warning" /> <span>{error}</span></div>}
 
       {loading ? (
         <div className="loading-container">
           <div className="spinner" />
-          <p>Loading movies...</p>
+          <p>Fetching movies catalogue...</p>
         </div>
-      ) : movies.length === 0 ? (
+      ) : sortedMovies.length === 0 ? (
         <div className="empty-state">
-          <div style={{fontSize:'3rem', marginBottom:'16px'}}>🎬</div>
+          <div className="empty-state-icon"><Icon name="film" size={52} /></div>
           <h3>No movies found</h3>
-          <p>Try adjusting your search or filters.</p>
+          <p>We couldn't find any movies matching your current search or filters.</p>
+          {hasActiveFilters && (
+            <button className="btn btn-secondary" style={{ marginTop: '16px' }} onClick={handleResetFilters}>
+              Reset Filters
+            </button>
+          )}
         </div>
       ) : (
         <>
-          <p className="results-count text-muted">{movies.length} movie{movies.length !== 1 ? 's' : ''} found</p>
+          <div className="results-header">
+            <p className="results-count text-muted">
+              Showing <strong>{sortedMovies.length}</strong> {sortedMovies.length === 1 ? 'movie' : 'movies'}
+            </p>
+          </div>
           <div className="movies-grid">
-            {movies.map(movie => <MovieCard key={movie.id} movie={movie} />)}
+            {sortedMovies.map(movie => (
+              <MovieCard key={movie.id} movie={movie} />
+            ))}
           </div>
         </>
       )}

@@ -1,54 +1,225 @@
-.shows-page { padding-bottom: 60px; }
-.shows-movie-header { }
-.back-link { display: inline-block; margin-bottom: 12px; font-size: 0.9rem; }
-.back-link:hover { color: var(--color-text); }
-.shows-movie-meta { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
-
-.date-selector {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  margin-bottom: 28px;
-  scrollbar-width: none;
+.shows-page {
+  padding-bottom: 70px;
 }
-.date-selector::-webkit-scrollbar { display: none; }
-.date-btn {
-  flex-shrink: 0;
-  padding: 10px 20px;
+
+.shows-header-banner {
+  padding: 24px 0 20px;
+}
+
+.shows-movie-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 6px;
+}
+
+.shows-movie-meta {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+/* Date Ribbon Card Picker */
+.date-picker-wrap {
+  margin-bottom: 32px;
+  padding: 20px 24px;
+}
+
+.date-picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.date-picker-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #fff;
+}
+
+.city-filter-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.city-select {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+.date-ribbon {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+}
+
+.date-ribbon::-webkit-scrollbar {
+  height: 4px;
+}
+
+.date-ribbon-card {
+  flex: 1;
+  min-width: 80px;
+  padding: 12px 10px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background: var(--color-surface);
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
-  font-weight: 500;
+  background: var(--color-bg3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.date-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
-.date-btn.active { background: var(--color-primary); border-color: var(--color-primary); color: #fff; font-weight: 700; }
 
-.theatre-groups { display: flex; flex-direction: column; gap: 16px; }
-.theatre-group { }
-.theatre-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-.theatre-name { font-size: 1.15rem; font-weight: 700; margin-bottom: 2px; }
-.theatre-city { font-size: 0.85rem; }
+.date-ribbon-card:hover {
+  border-color: var(--color-primary);
+  background: var(--color-surface);
+  transform: translateY(-2px);
+}
 
-.show-times { display: flex; gap: 12px; flex-wrap: wrap; }
+.date-ribbon-card.active {
+  background: linear-gradient(135deg, var(--color-primary), #c73278);
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 18px var(--color-primary-glow);
+  transform: translateY(-2px);
+}
+
+.ribbon-weekday {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+.date-ribbon-card.active .ribbon-weekday {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.ribbon-day {
+  font-size: 1.4rem;
+  font-weight: 800;
+  line-height: 1;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.ribbon-month {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+.date-ribbon-card.active .ribbon-month {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Theatres */
+.theatre-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.theatre-groups-info {
+  font-size: 0.9rem;
+  margin-bottom: -6px;
+}
+
+.theatre-group {
+  padding: 24px;
+  transition: border-color 0.2s;
+}
+
+.theatre-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.theatre-name {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.theatre-city {
+  font-size: 0.88rem;
+}
+
+.theatre-info-badge {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  background: var(--color-bg3);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+}
+
+.show-times {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
 .show-time-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 12px 20px;
+  padding: 12px 18px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-bg3);
   cursor: pointer;
-  transition: all 0.2s;
-  gap: 4px;
-  min-width: 100px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  min-width: 110px;
+  text-align: center;
+  gap: 3px;
 }
-.show-time-btn:hover { border-color: var(--color-primary); background: rgba(232,67,147,0.08); }
-.show-time { font-size: 1rem; font-weight: 700; color: var(--color-text); }
-.show-screen { font-size: 0.78rem; }
+
+.show-time-btn:hover {
+  border-color: var(--color-primary);
+  background: rgba(232, 67, 147, 0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(232, 67, 147, 0.2);
+}
+
+.show-time {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.show-screen {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.show-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--color-success);
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+@media (max-width: 768px) {
+  .date-ribbon-card {
+    min-width: 68px;
+    padding: 10px 6px;
+  }
+  .theatre-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

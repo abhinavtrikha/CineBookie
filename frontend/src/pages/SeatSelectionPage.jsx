@@ -1,7 +1,10 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../api/axios';
+import Icon from '../components/Icon';
 import './SeatSelectionPage.css';
+
+const MAX_SEATS_ALLOWED = 8;
 
 function groupSeatsByRow(seats) {
   const rows = {};
@@ -9,15 +12,14 @@ function groupSeatsByRow(seats) {
     if (!rows[seat.row_label]) rows[seat.row_label] = [];
     rows[seat.row_label].push(seat);
   }
-  // Sort seats within each row by seat_number
   for (const row of Object.values(rows)) {
     row.sort((a, b) => a.seat_number - b.seat_number);
   }
-  // Return sorted rows
   return Object.entries(rows).sort(([a], [b]) => a.localeCompare(b));
 }
 
 function formatTime(timeStr) {
+  if (!timeStr) return '';
   const [h, m] = timeStr.split(':');
   const hour = parseInt(h, 10);
   const ampm = hour >= 12 ? 'PM' : 'AM';
@@ -36,6 +38,7 @@ export default function SeatSelectionPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    setLoading(true);
     Promise.all([
       api.get(`/shows/${showId}`),
       api.get(`/seats/show/${showId}`)
@@ -44,24 +47,44 @@ export default function SeatSelectionPage() {
       setSeats(seatsRes.data.seats);
       setLoading(false);
     }).catch(() => {
-      setError('Failed to load seat layout.');
+      setError('Failed to load seating configuration.');
       setLoading(false);
     });
   }, [showId]);
 
   const toggleSeat = (seat) => {
     if (!seat.is_available) return;
+    setError('');
+
+    const isAlreadySelected = selected.some(s => s.id === seat.id);
+    if (!isAlreadySelected && selected.length >= MAX_SEATS_ALLOWED) {
+      setError(`You can select a maximum of ${MAX_SEATS_ALLOWED} seats per booking.`);
+      return;
+    }
+
     setSelected(prev =>
-      prev.find(s => s.id === seat.id)
+      isAlreadySelected
         ? prev.filter(s => s.id !== seat.id)
         : [...prev, seat]
     );
   };
 
-  const totalAmount = selected.reduce((sum, s) => sum + parseFloat(s.price), 0);
+  const handleClearSelection = () => {
+    setSelected([]);
+    setError('');
+  };
+
+  const totalAmount = useMemo(() => {
+    return selected.reduce((sum, s) => sum + parseFloat(s.price), 0);
+  }, [selected]);
+
+  const seatRows = useMemo(() => groupSeatsByRow(seats), [seats]);
 
   const handleProceed = async () => {
-    if (selected.length === 0) { setError('Please select at least one seat.'); return; }
+    if (selected.length === 0) {
+      setError('Please choose at least one seat to continue.');
+      return;
+    }
     setBooking(true);
     setError('');
     try {
@@ -71,44 +94,91 @@ export default function SeatSelectionPage() {
       });
       navigate(`/bookings/${res.data.booking.id}/review`);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to create booking. Please try again.');
+      setError(err.response?.data?.error || 'Failed to reserve seats. Some seats may have just been booked. Please choose other seats.');
+      // Refresh seat layout to sync updated availability
+      api.get(`/seats/show/${showId}`).then(res => setSeats(res.data.seats)).catch(() => {});
       setBooking(false);
     }
   };
 
-  if (loading) return <div className="loading-container"><div className="spinner" /><p>Loading seat layout...</p></div>;
-  if (!show) return <div className="container" style={{padding:'60px 20px', textAlign:'center'}}><h2>{error || 'Show not found'}</h2></div>;
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="spinner" />
+        <p>Loading real-time theatre seat map...</p>
+      </div>
+    );
+  }
 
-  const seatRows = groupSeatsByRow(seats);
+  if (!show) {
+    return (
+      <div className="container" style={{ padding: '80px 20px', textAlign: 'center' }}>
+        <h2>{error || 'Showtime not found'}</h2>
+        <Link to="/movies" className="btn btn-secondary" style={{ marginTop: '16px' }}>
+          Back to Movies
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="seat-page container">
-      {/* Show info */}
-      <div className="seat-show-info">
+      {/* Top Show Info Bar */}
+      <div className="seat-show-info card">
         <div>
+          <Link to={`/movies/${show.movie_id}/shows`} className="back-link" style={{ marginBottom: '8px' }}>
+            ← Change Showtime / Cinema
+          </Link>
           <h1 className="seat-movie-title">{show.movie_title}</h1>
-          <p className="text-muted">
-            {show.theatre_name} · {show.screen_name} · {new Date(show.show_date).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })} · {formatTime(show.show_time)}
+          <p className="text-muted" style={{ fontSize: '0.92rem' }}>
+            <Icon name="building" size={17} /> <strong>{show.theatre_name}</strong> ({show.city}) · <Icon name="screen" size={17} /> {show.screen_name} · <Icon name="calendar" size={17} />{' '}
+            {new Date(show.show_date).toLocaleDateString('en-IN', {
+              weekday: 'short', day: 'numeric', month: 'short'
+            })}{' '}
+            at <strong>{formatTime(show.show_time)}</strong>
           </p>
+        </div>
+        {selected.length > 0 && (
+          <button className="btn btn-ghost btn-sm" onClick={handleClearSelection} type="button">
+            Clear Selection ({selected.length})
+          </button>
+        )}
+      </div>
+
+      {/* Screen Indicator */}
+      <div className="screen-indicator-wrap">
+        <div className="screen-curve" />
+        <div className="screen-glow" />
+        <p className="screen-text">ALL EYES THIS WAY · CINEMA SCREEN</p>
+      </div>
+
+      {/* Seat Legend */}
+      <div className="seat-legend">
+        <div className="legend-item">
+          <div className="legend-seat available" />
+          <span>Available</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-seat premium" />
+          <span>Premium Recliner</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-seat selected" />
+          <span>Selected</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-seat booked" />
+          <span>Unavailable</span>
         </div>
       </div>
 
-      {/* Screen indicator */}
-      <div className="screen-indicator">
-        <div className="screen-bar">SCREEN</div>
-      </div>
+      {error && (
+        <div className="alert alert-error seat-error-alert">
+          <Icon name="warning" /> <span>{error}</span>
+        </div>
+      )}
 
-      {/* Seat legend */}
-      <div className="seat-legend">
-        <div className="legend-item"><div className="legend-seat available" /><span>Available</span></div>
-        <div className="legend-item"><div className="legend-seat selected" /><span>Selected</span></div>
-        <div className="legend-item"><div className="legend-seat booked" /><span>Booked</span></div>
-        <div className="legend-item"><div className="legend-seat premium" /><span>Premium</span></div>
-      </div>
-
-      {error && <div className="alert alert-error" style={{maxWidth:'600px', margin:'0 auto 16px'}}>{error}</div>}
-
-      {/* Seat grid */}
+      {/* Interactive Seat Matrix */}
       <div className="seat-grid-container">
         <div className="seat-grid">
           {seatRows.map(([rowLabel, rowSeats]) => (
@@ -118,11 +188,17 @@ export default function SeatSelectionPage() {
                 {rowSeats.map(seat => {
                   const isSelected = selected.some(s => s.id === seat.id);
                   let cls = 'seat';
-                  if (!seat.is_available) cls += ' booked';
-                  else if (isSelected) cls += ' selected';
-                  else if (seat.seat_type === 'premium') cls += ' premium available';
-                  else if (seat.seat_type === 'vip') cls += ' vip available';
-                  else cls += ' available';
+                  if (!seat.is_available) {
+                    cls += ' booked';
+                  } else if (isSelected) {
+                    cls += ' selected';
+                  } else if (seat.seat_type === 'premium') {
+                    cls += ' premium available';
+                  } else if (seat.seat_type === 'vip') {
+                    cls += ' vip available';
+                  } else {
+                    cls += ' available';
+                  }
 
                   return (
                     <button
@@ -130,8 +206,9 @@ export default function SeatSelectionPage() {
                       className={cls}
                       onClick={() => toggleSeat(seat)}
                       disabled={!seat.is_available}
-                      title={`${rowLabel}${seat.seat_number} — ₹${seat.price} (${seat.seat_type})`}
+                      title={`Seat ${rowLabel}${seat.seat_number} — ₹${seat.price} (${seat.seat_type})`}
                       aria-label={`Seat ${rowLabel}${seat.seat_number}, ${seat.seat_type}, ₹${seat.price}, ${seat.is_available ? 'available' : 'booked'}`}
+                      type="button"
                     >
                       {seat.seat_number}
                     </button>
@@ -144,28 +221,48 @@ export default function SeatSelectionPage() {
         </div>
       </div>
 
-      {/* Booking summary */}
-      <div className="seat-summary">
-        <div className="summary-details">
-          {selected.length === 0 ? (
-            <p className="text-muted">Select seats to proceed</p>
-          ) : (
-            <>
-              <p className="summary-seats">
-                <strong>{selected.length}</strong> seat{selected.length > 1 ? 's' : ''} selected:
-                {' '}{selected.map(s => `${s.row_label}${s.seat_number}`).join(', ')}
-              </p>
-              <p className="summary-total">Total: <strong className="text-primary">₹{totalAmount.toFixed(2)}</strong></p>
-            </>
-          )}
+      {/* Floating Bottom Booking Action Bar */}
+      <div className="seat-summary-bar">
+        <div className="container seat-summary-inner">
+          <div className="summary-left">
+            {selected.length === 0 ? (
+              <div>
+                <p style={{ fontWeight: 600 }}>No seats chosen yet</p>
+                <p className="text-muted" style={{ fontSize: '0.85rem' }}>
+                  Tap available seats above to reserve (Max {MAX_SEATS_ALLOWED} tickets)
+                </p>
+              </div>
+            ) : (
+              <div>
+                <div className="selected-chips">
+                  {selected.map(s => (
+                    <span key={s.id} className="selected-seat-chip">
+                      {s.row_label}{s.seat_number} <span className="chip-price">₹{s.price}</span>
+                    </span>
+                  ))}
+                </div>
+                <p className="summary-subtext text-muted">
+                  {selected.length} seat{selected.length > 1 ? 's' : ''} selected
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="summary-right">
+            <div className="total-display">
+              <span className="total-label text-muted">Total Price</span>
+              <span className="total-amount text-primary">₹{totalAmount.toFixed(2)}</span>
+            </div>
+            <button
+              className="btn btn-primary btn-lg proceed-btn"
+              onClick={handleProceed}
+              disabled={selected.length === 0 || booking}
+              type="button"
+            >
+              {booking ? 'Reserving Seats...' : 'Proceed to Review →'}
+            </button>
+          </div>
         </div>
-        <button
-          className="btn btn-primary btn-lg"
-          onClick={handleProceed}
-          disabled={selected.length === 0 || booking}
-        >
-          {booking ? 'Processing...' : 'Proceed to Book →'}
-        </button>
       </div>
     </div>
   );

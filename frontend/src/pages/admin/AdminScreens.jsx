@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import api from '../../api/axios';
+import Icon from '../../components/Icon';
 import './Admin.css';
 
 export default function AdminScreens() {
@@ -10,6 +11,7 @@ export default function AdminScreens() {
   const [screens, setScreens] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [screenForm, setScreenForm] = useState({ name: '', total_seats: 60 });
   const [activeScreenSeats, setActiveScreenSeats] = useState(null);
   const [seatsList, setSeatsList] = useState([]);
@@ -89,6 +91,7 @@ export default function AdminScreens() {
       setSuccess(`Screen "${newScreen.name}" created with standard seat layout!`);
       setShowModal(false);
       loadScreens(selectedTheatreId);
+      setTimeout(() => setSuccess(''), 4000);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to create screen.');
     } finally {
@@ -96,13 +99,15 @@ export default function AdminScreens() {
     }
   };
 
-  const handleDeleteScreen = async (screenId, name) => {
-    if (!confirm(`Delete "${name}" and all its seats and shows?`)) return;
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      await api.delete(`/screens/${screenId}`);
-      setScreens(prev => prev.filter(s => s.id !== screenId));
-      if (activeScreenSeats?.id === screenId) setActiveScreenSeats(null);
-      setSuccess('Screen deleted successfully.');
+      await api.delete(`/screens/${deleteTarget.id}`);
+      setScreens(prev => prev.filter(s => s.id !== deleteTarget.id));
+      if (activeScreenSeats?.id === deleteTarget.id) setActiveScreenSeats(null);
+      setSuccess(`Screen "${deleteTarget.name}" deleted successfully.`);
+      setDeleteTarget(null);
+      setTimeout(() => setSuccess(''), 4000);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to delete screen.');
     }
@@ -124,21 +129,23 @@ export default function AdminScreens() {
   return (
     <div className="admin-page container">
       <div className="admin-header-bar">
-        <div className="page-header" style={{ paddingBottom: 0 }}>
-          <h1 className="page-title">Screens & Seats</h1>
+        <div>
+          <h1 className="page-title">Screens & Seat Configurations</h1>
           <p className="page-subtitle">Manage screens and seating layouts (FR-13, FR-14)</p>
         </div>
         {selectedTheatreId && (
-          <button className="btn btn-primary" onClick={openAddScreen}>+ Add Screen</button>
+          <button className="btn btn-primary" onClick={openAddScreen} type="button">
+            + Add New Screen
+          </button>
         )}
       </div>
 
-      {error && <div className="alert alert-error">{error}</div>}
-      {success && <div className="alert alert-success">{success}</div>}
+      {error && <div className="alert alert-error"><Icon name="warning" /> <span>{error}</span></div>}
+      {success && <div className="alert alert-success"><Icon name="check" /> <span>{success}</span></div>}
 
       <div className="card" style={{ marginBottom: '24px' }}>
         <div className="form-group" style={{ marginBottom: 0 }}>
-          <label className="form-label">Select Cinema Theatre:</label>
+          <label className="form-label">Selected Cinema Multiplex:</label>
           <select
             className="form-input"
             value={selectedTheatreId}
@@ -154,15 +161,15 @@ export default function AdminScreens() {
       </div>
 
       {loading ? (
-        <div className="loading-container"><div className="spinner" /></div>
+        <div className="loading-container"><div className="spinner" /><p>Loading screens...</p></div>
       ) : (
         <div className="admin-table-wrap">
           <table className="data-table">
             <thead>
               <tr>
                 <th>Screen ID</th>
-                <th>Screen Name</th>
-                <th>Total Seats</th>
+                <th>Auditorium Name</th>
+                <th>Capacity</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -170,19 +177,21 @@ export default function AdminScreens() {
               {screens.map(screen => (
                 <tr key={screen.id}>
                   <td>{screen.id}</td>
-                  <td style={{ fontWeight: 600 }}>{screen.name}</td>
+                  <td style={{ fontWeight: 700 }}><Icon name="screen" size={16} /> {screen.name}</td>
                   <td>{screen.total_seats} seats</td>
                   <td>
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <button
                         className="btn btn-secondary btn-sm"
                         onClick={() => handleViewSeats(screen)}
+                        type="button"
                       >
-                        View Seats
+                        Inspect Seats
                       </button>
                       <button
                         className="btn btn-danger btn-sm"
-                        onClick={() => handleDeleteScreen(screen.id, screen.name)}
+                        onClick={() => setDeleteTarget(screen)}
+                        type="button"
                       >
                         Delete
                       </button>
@@ -194,25 +203,25 @@ export default function AdminScreens() {
           </table>
           {screens.length === 0 && (
             <div className="empty-state">
-              <h3>No screens found for this theatre</h3>
-              <p>Click "+ Add Screen" to configure screens and seat layouts.</p>
+              <h3>No screens found for this multiplex</h3>
+              <p>Click "+ Add New Screen" to configure screens and seat layouts.</p>
             </div>
           )}
         </div>
       )}
 
-      {/* Seats Layout Drawer / Modal */}
+      {/* Seats Layout Drawer */}
       {activeScreenSeats && (
-        <div className="card" style={{ marginTop: '32px' }}>
+        <div className="card" style={{ marginTop: '32px', border: '1px solid var(--color-primary)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <div>
-              <h2 style={{ fontSize: '1.25rem' }}>Seat Layout: {activeScreenSeats.name}</h2>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Seating Layout: {activeScreenSeats.name}</h2>
               <p className="text-muted" style={{ fontSize: '0.85rem' }}>
-                Total Configured Seats: {seatsList.length} / Capacity: {activeScreenSeats.total_seats}
+                Configured: {seatsList.length} seats / Max Capacity: {activeScreenSeats.total_seats}
               </p>
             </div>
-            <button className="btn btn-ghost btn-sm" onClick={() => setActiveScreenSeats(null)}>
-              Close
+            <button className="btn btn-ghost btn-sm" onClick={() => setActiveScreenSeats(null)} type="button">
+              Close Preview
             </button>
           </div>
 
@@ -223,22 +232,22 @@ export default function AdminScreens() {
               <p>No seats generated yet for this screen.</p>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', maxHeight: '300px', overflowY: 'auto', padding: '12px', background: 'var(--color-bg3)', borderRadius: 'var(--radius-md)' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', maxHeight: '300px', overflowY: 'auto', padding: '16px', background: 'var(--color-bg3)', borderRadius: 'var(--radius-md)' }}>
               {seatsList.map(seat => (
                 <div
                   key={seat.id}
                   style={{
                     padding: '6px 10px',
-                    borderRadius: '4px',
+                    borderRadius: '6px',
                     background: seat.seat_type === 'premium' ? 'var(--color-seat-premium)' : 'var(--color-seat-available)',
                     border: '1px solid var(--color-border)',
                     fontSize: '0.8rem',
                     textAlign: 'center',
-                    minWidth: '50px'
+                    minWidth: '52px'
                   }}
                 >
-                  <div style={{ fontWeight: 700 }}>{seat.row_label}{seat.seat_number}</div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>₹{seat.price}</div>
+                  <div style={{ fontWeight: 800 }}>{seat.row_label}{seat.seat_number}</div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--color-accent)' }}>₹{seat.price}</div>
                 </div>
               ))}
             </div>
@@ -250,8 +259,8 @@ export default function AdminScreens() {
       {showModal && (
         <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) setShowModal(false); }}>
           <div className="modal">
-            <h2 className="modal-title">Add Screen to Theatre</h2>
-            {error && <div className="alert alert-error">{error}</div>}
+            <h2 className="modal-title">Add Screen / Auditorium</h2>
+            {error && <div className="alert alert-error"><Icon name="warning" /> <span>{error}</span></div>}
             <form onSubmit={handleCreateScreen}>
               <div className="form-group">
                 <label className="form-label">Screen Name *</label>
@@ -276,7 +285,7 @@ export default function AdminScreens() {
                 />
               </div>
               <p className="text-muted" style={{ fontSize: '0.82rem', marginBottom: '16px' }}>
-                Note: Standard seating (Rows A-F) with default pricing (₹150 standard) will be automatically initialized.
+                Standard seating (Rows A-F) with standard price (₹150) will be automatically generated.
               </p>
               <div className="modal-actions">
                 <button type="button" className="btn btn-ghost" onClick={() => setShowModal(false)}>Cancel</button>
@@ -285,6 +294,28 @@ export default function AdminScreens() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteTarget && (
+        <div className="modal-overlay" onClick={() => setDeleteTarget(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <h2 className="modal-title" style={{ color: 'var(--color-error)' }}>
+              Delete "{deleteTarget.name}"?
+            </h2>
+            <p style={{ marginBottom: '14px', lineHeight: 1.6 }}>
+              Deleting this screen will also permanently remove all of its configured seats and show schedules.
+            </p>
+            <div className="modal-actions">
+              <button type="button" className="btn btn-ghost" onClick={() => setDeleteTarget(null)}>
+                Cancel
+              </button>
+              <button type="button" className="btn btn-danger" onClick={handleConfirmDelete}>
+                Delete Screen
+              </button>
+            </div>
           </div>
         </div>
       )}
